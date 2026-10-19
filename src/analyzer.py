@@ -48,11 +48,29 @@ def analyze_password(password):
 
     lowered = password.lower()
 
-    if any(pattern in lowered for pattern in (
-        "1234", "abcd", "qwerty", "password"
-    )):
+    common_patterns = (
+        "1234",
+        "abcd",
+        "qwerty",
+        "password",
+        "1111",
+        "0000",
+    )
+
+    has_common_pattern = any(pattern in lowered for pattern in common_patterns)
+
+    has_repeated_sequence = (
+        len(password) >= 6
+        and len(password) % 3 == 0
+        and password[:3] * (len(password) // 3) == password
+    )
+
+    if has_common_pattern or has_repeated_sequence:
         issues.append("Password contains a predictable pattern.")
-        recommendations.append("Avoid predictable sequences and common words.")
+        recommendations.append(
+            "Avoid predictable sequences, repeated characters, "
+            "and common words."
+        )
 
     if len(set(password)) == 1:
         issues.append("Password repeats the same character.")
@@ -71,7 +89,10 @@ def analyze_password(password):
         recommendations.append("Consider including symbols if appropriate.")
 
     if not issues:
-        issues.append("No basic weakness detected by these checks.")
+        issues.append(
+            "No known weakness was detected by the basic checks. "
+            "This does not guarantee that the password is secure."
+        )
 
     return {
         "length": length,

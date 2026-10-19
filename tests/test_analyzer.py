@@ -45,6 +45,14 @@ def test_predictable_sequence_is_flagged():
     )
 
 
+def test_repeated_sequence_is_flagged():
+    result = analyze_password("abcabcabcabc")
+
+    assert any(
+        "predictable pattern" in issue
+        for issue in result["issues"]
+    )
+
 def test_repeated_character_is_flagged():
     result = analyze_password("aaaaaaaaaaaa")
 
@@ -70,6 +78,7 @@ def test_no_basic_weakness_detected():
     result = analyze_password("MapleRiverCloud27!")
 
     assert result["issues"] == [
-        "No basic weakness detected by these checks."
+        "No known weakness was detected by the basic checks. "
+        "This does not guarantee that the password is secure."
     ]
     assert result["recommendations"] == []
