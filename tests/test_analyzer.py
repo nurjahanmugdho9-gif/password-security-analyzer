@@ -82,3 +82,19 @@ def test_no_basic_weakness_detected():
         "This does not guarantee that the password is secure."
     ]
     assert result["recommendations"] == []
+def test_repeated_two_character_block_is_flagged():
+    result = analyze_password("abababab")
+
+    assert any(
+        "predictable pattern" in issue
+        for issue in result["issues"]
+    )
+
+
+def test_repeated_block_inside_longer_password_is_not_flagged_as_whole_repeat():
+    result = analyze_password("abcabcXYZ!")
+
+    assert not any(
+        "predictable pattern" in issue
+        for issue in result["issues"]
+    )

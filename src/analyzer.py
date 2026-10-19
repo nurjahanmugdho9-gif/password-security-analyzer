@@ -11,6 +11,22 @@ COMMON_PASSWORDS = {
 }
 
 
+def has_repeated_block(password, min_block_size=2):
+    """Return True if a short block repeats to form the whole password."""
+    length = len(password)
+
+    for block_size in range(min_block_size, length // 2 + 1):
+        if length % block_size != 0:
+            continue
+
+        block = password[:block_size]
+
+        if block * (length // block_size) == password:
+            return True
+
+    return False
+
+
 def analyze_password(password):
     """Analyze basic password characteristics and common weaknesses."""
 
@@ -59,11 +75,7 @@ def analyze_password(password):
 
     has_common_pattern = any(pattern in lowered for pattern in common_patterns)
 
-    has_repeated_sequence = (
-        len(password) >= 6
-        and len(password) % 3 == 0
-        and password[:3] * (len(password) // 3) == password
-    )
+    has_repeated_sequence = has_repeated_block(password)
 
     if has_common_pattern or has_repeated_sequence:
         issues.append("Password contains a predictable pattern.")
