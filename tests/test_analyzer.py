@@ -1,7 +1,7 @@
 
 import pytest
 
-from src.analyzer import analyze_password
+from src.analyzer import analyze_password, generate_password
 
 
 def test_password_length():
@@ -98,3 +98,36 @@ def test_repeated_block_inside_longer_password_is_not_flagged_as_whole_repeat():
         "predictable pattern" in issue
         for issue in result["issues"]
     )
+
+
+def test_analysis_includes_score_entropy_and_structured_findings():
+    result = analyze_password("password123")
+
+    assert 0 <= result["score"] <= 4
+    assert result["rating"] == "Very weak"
+    assert result["entropy_bits"] > 0
+    assert any(
+        finding["code"] == "common_password"
+        for finding in result["findings"]
+    )
+
+
+def test_reverse_sequence_is_flagged():
+    result = analyze_password("Safe4321Password!")
+
+    assert any(
+        "predictable pattern" in issue
+        for issue in result["issues"]
+    )
+
+
+def test_secure_password_generator():
+    password = generate_password(24)
+
+    assert len(password) == 24
+    assert password != generate_password(24)
+
+
+def test_password_generator_rejects_short_lengths():
+    with pytest.raises(ValueError):
+        generate_password(7)
